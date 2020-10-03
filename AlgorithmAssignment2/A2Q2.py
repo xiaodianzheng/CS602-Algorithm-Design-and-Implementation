@@ -2,70 +2,23 @@ import sys
 import heapq
 
 
-class PracticableProjects(object):
-    def __init__(self):
-        self._queue = []
-
-    def push(self, item, priority):
-        heapq.heappush(self._queue, (-priority, item))
-
-    def pop(self):
-        return heapq.heappop(self._queue)[-1]
-
-    def visit(self):
-        return self._queue[0][-1]
-
-    def qsize(self):
-        return len(self._queue)
-
-    def empty(self):
-        return True if not self._queue else False
-
-
-class ImpracticableProjects(object):
-    def __init__(self):
-        self._queue = []
-
-    def push(self, item, priority):
-        heapq.heappush(self._queue, (priority, item))
-
-    def pop(self):
-        return heapq.heappop(self._queue)[-1]
-
-    def visit(self):
-        return self._queue[0][-1]
-
-    def qsize(self):
-        return len(self._queue)
-
-    def empty(self):
-        return True if not self._queue else False
-
-
-class Project(object):
-    def __init__(self, cost, revenue):
-        self.cost = cost
-        self.revenue = revenue
-
-
 def project_selection(c, k):
-    practicable_projects = PracticableProjects()
-    impraticable_projects = ImpracticableProjects()
+    max_heap = []
+    min_heap = []
     for ci in cr:
-        cur_project = Project(ci[0], ci[1])
         if ci[0] <= c:
-            practicable_projects.push(cur_project, cur_project.revenue - cur_project.cost)
+            heapq.heappush(max_heap, ci[0] - ci[1])
         else:
-            impraticable_projects.push(cur_project, cur_project.cost)
+            heapq.heappush(min_heap, (ci[0], ci[1]))
     for i in range(k):
-        if practicable_projects.qsize() == 0:
+        if len(max_heap) == 0:
             return "impossible"
-        new_project = practicable_projects.pop()
-        c += new_project.revenue - new_project.cost
-        while (not impraticable_projects.empty() and c > impraticable_projects.visit().cost):
-            new_practicable_project = impraticable_projects.pop()
-            practicable_projects.push(new_practicable_project,
-                                      new_practicable_project.revenue - new_practicable_project.cost)
+        new_project_profit = heapq.heappop(max_heap)
+        c -= new_project_profit
+        while len(min_heap) != 0 and c > min_heap[0][0]:
+            cur = heapq.heappop(min_heap)
+            max_heap.append(cur[0] - cur[1])
+            heapq.heapify(max_heap)
     return c
 
 
