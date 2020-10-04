@@ -3,6 +3,9 @@ import heapq
 
 
 def project_selection(c, k):
+    """
+    The time complexity is O(nlogn)
+    """
     max_heap = []
     min_heap = []
     for ci in cr:
@@ -11,14 +14,13 @@ def project_selection(c, k):
         else:
             heapq.heappush(min_heap, (ci[0], ci[1]))
     for i in range(k):
+        while len(min_heap) != 0 and c >= min_heap[0][0]:
+            cur = heapq.heappop(min_heap)
+            heapq.heappush(max_heap, cur[0] - cur[1])
         if len(max_heap) == 0:
             return "impossible"
         new_project_profit = heapq.heappop(max_heap)
         c -= new_project_profit
-        while len(min_heap) != 0 and c > min_heap[0][0]:
-            cur = heapq.heappop(min_heap)
-            max_heap.append(cur[0] - cur[1])
-            heapq.heapify(max_heap)
     return c
 
 
