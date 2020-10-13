@@ -29,7 +29,7 @@ def get_lcs(a, b, i, j):
 
 def LCMS(a, b):
     """
-    The total time complexity is O(mn+m^2+n^2) where m is the length of a and n is the length of b
+    The total time complexity is O(mn) where m is the length of a and n is the length of b
     """
     new_a = []
     new_b = []
