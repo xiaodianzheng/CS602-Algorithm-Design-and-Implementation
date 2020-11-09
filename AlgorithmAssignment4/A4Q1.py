@@ -12,24 +12,25 @@ def fourteen_queen(pos):
         ld |= (1 << p[0] + p[1] - 2)
         rd |= (1 << chessboard - 1 - p[0] + p[1])
     placed_rows = set([p[0] - 1 for p in pos])
-
-    def dfs(row, column, left_diagonal, right_diagonal):
+    state = [(0, col, ld, rd)]
+    while len(state) > 0:
+        cur_state = state.pop()
+        row = cur_state[0]
+        column = cur_state[1]
+        left_diagonal = cur_state[2]
+        right_diagonal = cur_state[3]
         if row in placed_rows:
-            dfs(row + 1, column, left_diagonal, right_diagonal)
+            state.append((row + 1, column, left_diagonal, right_diagonal))
         else:
             possible_column = ((1 << chessboard) - 1) & ~column & ~(left_diagonal >> row) & \
                               ~(right_diagonal >> (chessboard - 1 - row))
             while possible_column:
-                cur = possible_column & -possible_column
+                cur_pos = possible_column & -possible_column
                 if row < chessboard - 1:
-                    dfs(row + 1, column ^ cur, left_diagonal ^ (cur << row),
-                        right_diagonal ^ (cur << (chessboard - 1 - row)))
+                    state.append((row + 1, column ^ cur_pos, left_diagonal ^ (cur_pos << row), right_diagonal ^ (cur_pos << (chessboard - 1 - row))))
                 else:
-                    nonlocal count
                     count += 1
-                possible_column ^= cur
-
-    dfs(0, col, ld, rd)
+                possible_column ^= cur_pos
     return count
 
 
