@@ -1,36 +1,64 @@
 import sys
 
 
-def fourteen_queen(pos):
-    chessboard = 14
-    count = 0
-    col = 0
-    ld = 0
-    rd = 0
+def calculate_row(pos):
+    row = 0
     for p in pos:
-        col |= (1 << p[1] - 1)
-        ld |= (1 << p[0] + p[1] - 2)
-        rd |= (1 << chessboard - 1 - p[0] + p[1])
+        row |= (1 << 14 - p[1])
+    return row
+
+
+def calculate_ld(pos):
+    ld = [0 for _ in range(14)]
+    for i in range(14):
+        for p in pos:
+            cur_ld = 15 - p[1] - p[0] + i
+            if cur_ld < 0 or cur_ld > 13:
+                continue
+            else:
+                ld[i] |= (1 << 15 - p[1] - p[0] + i)
+    return ld
+
+
+def calculate_rd(pos):
+    rd = [0 for _ in range(14)]
+    for i in range(14):
+        for p in pos:
+            cur_ld = 13 - p[1] + p[0] - i
+            if cur_ld < 0 or cur_ld > 13:
+                continue
+            else:
+                rd[i] |= (1 << 13 - p[1] + p[0] - i)
+    return rd
+
+
+def fourteen_queen(pos):
+    count = 0
+    row = calculate_row(pos)
+    all_ld = calculate_ld(pos)
+    all_rd = calculate_rd(pos)
+    target = (1 << 14) - 1
     placed_rows = set([p[0] - 1 for p in pos])
-    state = [(0, col, ld, rd)]
-    while len(state) > 0:
-        cur_state = state.pop()
-        row = cur_state[0]
-        column = cur_state[1]
-        left_diagonal = cur_state[2]
-        right_diagonal = cur_state[3]
-        if row in placed_rows:
-            state.append((row + 1, column, left_diagonal, right_diagonal))
+
+    def dfs_bitwise(row, ld, rd, cur_rows):
+        nonlocal count
+        if cur_rows in placed_rows:
+            p = 0
+            # ld = ld | all_ld[cur_rows]
+            # rd = rd | all_rd[cur_rows]
+            dfs_bitwise(row + p, (ld + p) << 1, (rd + p) >> 1, cur_rows + 1)
+        elif row != target:
+            ld = ld | all_ld[cur_rows]
+            rd = rd | all_rd[cur_rows]
+            valid_rows = target & ~(row | ld | rd)
+            while valid_rows != 0:
+                p = valid_rows & -valid_rows
+                valid_rows = valid_rows - p
+                dfs_bitwise(row + p, (ld + p) << 1, (rd + p) >> 1, cur_rows + 1)
         else:
-            possible_column = ((1 << chessboard) - 1) & ~column & ~(left_diagonal >> row) & \
-                              ~(right_diagonal >> (chessboard - 1 - row))
-            while possible_column:
-                cur_pos = possible_column & -possible_column
-                if row < chessboard - 1:
-                    state.append((row + 1, column ^ cur_pos, left_diagonal ^ (cur_pos << row), right_diagonal ^ (cur_pos << (chessboard - 1 - row))))
-                else:
-                    count += 1
-                possible_column ^= cur_pos
+            count += 1
+
+    dfs_bitwise(row, 0, 0, 0)
     return count
 
 
