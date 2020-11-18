@@ -44,8 +44,6 @@ def fourteen_queen(pos):
         nonlocal count
         if cur_rows in placed_rows:
             p = 0
-            # ld = ld | all_ld[cur_rows]
-            # rd = rd | all_rd[cur_rows]
             dfs_bitwise(row + p, (ld + p) << 1, (rd + p) >> 1, cur_rows + 1)
         elif row != target:
             ld = ld | all_ld[cur_rows]
